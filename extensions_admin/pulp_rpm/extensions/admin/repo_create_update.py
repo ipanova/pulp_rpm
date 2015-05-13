@@ -19,6 +19,7 @@ from pulp_rpm.common import constants, ids
 
 
 CONFIG_KEY_SKIP = 'type_skip_list'
+CONFIG_KEY_MIRRORLIST = 'mirrorlist'
 
 YUM_DISTRIBUTOR_CONFIG_KEYS = [
     ('relative_url', 'relative_url'),
@@ -79,10 +80,12 @@ class RpmRepoCreateCommand(CreateRepositoryCommand, ImporterConfigMixin):
         """
         super(RpmRepoCreateCommand, self).populate_sync_group()
         self.sync_group.add_option(repo_options.OPT_SKIP)
+        self.sync_group.add_option(repo_options.OPT_MIRRORLIST)
 
     def parse_sync_group(self, user_input):
         config = ImporterConfigMixin.parse_sync_group(self, user_input)
         safe_parse(user_input, config, repo_options.OPT_SKIP.keyword, CONFIG_KEY_SKIP)
+        safe_parse(user_input, config, repo_options.OPT_MIRRORLIST.keyword, CONFIG_KEY_MIRRORLIST)
         return config
 
     # -- create repository command overrides ----------------------------------

@@ -51,6 +51,9 @@ d = _('comma-separated list of types to omit when synchronizing, if not '
 d = d % {'t': ', '.join(VALID_SKIP_TYPES)}
 OPT_SKIP = PulpCliOption('--skip', d, required=False, parse_func=parse_skip_types)
 
+d = _('mirrorlist of the external source repository to sync')
+OPT_MIRRORLIST = PulpCliOption('--mirrorlist', d, required=False, parse_func=None)
+
 # publish options
 d = _('if "true", on each successful sync the repository will automatically be '
       'published on the configured protocols; if "false" synchronized content '

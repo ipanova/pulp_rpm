@@ -87,6 +87,7 @@ def upload(repo, type_id, unit_key, metadata, file_path, conduit, config):
         models.PackageCategory.TYPE: _handle_group_category,
         models.Errata.TYPE: _handle_erratum,
         models.YumMetadataFile.TYPE: _handle_yum_metadata_file,
+        models.CompsFile.TYPE: _handle_comps_file
     }
 
     if type_id not in handlers:
@@ -202,6 +203,33 @@ def _handle_yum_metadata_file(type_id, unit_key, metadata, file_path, conduit, c
     except IOError:
         raise StoreFileError()
 
+
+def _handle_comps_file(type_id, unit_key, metadata, file_path, conduit, config):
+    """
+    Handles the upload for a yum repository comps file.
+
+    :type  type_id: str
+    :type  unit_key: dict
+    :type  metadata: dict or None
+    :type  file_path: str
+    :type  conduit: pulp.plugins.conduits.upload.UploadConduit
+    :type  config: pulp.plugins.config.PluginCallConfiguration
+    """
+    # Validate the user specified data by instantiating the model
+    try:
+        model_class = models.TYPE_MAP[type_id]
+        model = model_class(metadata=metadata, **unit_key)
+    except TypeError:
+        raise ModelInstantiationError()
+
+    # Move the file to its final storage location in Pulp
+    try:
+        unit = conduit.init_unit(model.TYPE, model.unit_key, model.metadata, model.relative_path)
+        shutil.move(file_path, unit.storage_path)
+    except IOError:
+        raise StoreFileError()
+    conduit.save_unit(unit)
+    
 
 def _handle_group_category(type_id, unit_key, metadata, file_path, conduit, config):
     """

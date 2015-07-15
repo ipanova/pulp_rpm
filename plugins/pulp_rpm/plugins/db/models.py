@@ -308,6 +308,17 @@ class YumMetadataFile(Package):
         return self.repo_id
 
 
+class CompsFile(Package):
+    UNIT_KEY_NAMES = ('id',)
+    TYPE = ids.TYPE_ID_COMPS
+
+    def __init__(self, id, metadata):
+        Package.__init__(self, locals())
+
+    @property
+    def relative_path(self):
+        return self.id
+
 TYPE_MAP = {
     Distribution.TYPE: Distribution,
     DRPM.TYPE: DRPM,
@@ -318,6 +329,7 @@ TYPE_MAP = {
     RPM.TYPE: RPM,
     SRPM.TYPE: SRPM,
     YumMetadataFile.TYPE: YumMetadataFile,
+    CompsFile.TYPE: CompsFile,
 }
 
 # put the NAMEDTUPLE attribute on each model class

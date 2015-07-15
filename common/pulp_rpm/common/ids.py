@@ -60,3 +60,5 @@ UNIT_KEY_DRPM = (
 METADATA_DRPM = ("size", "sequence", "new_package", "relativepath")
 
 TYPE_ID_YUM_REPO_METADATA_FILE = 'yum_repo_metadata_file'
+
+TYPE_ID_COMPS = 'comps'

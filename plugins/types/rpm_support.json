@@ -94,5 +94,13 @@
             ["repo_id", "data_type"],
         "search_indexes" :
             ["data_type"]
+    },
+
+    {
+        "id" : "comps",
+        "display_name" : "YUM Repository Comps",
+        "description" : "YUM Repository Comps",
+        "unit_key" :
+            ["id"]
     }
 ]}

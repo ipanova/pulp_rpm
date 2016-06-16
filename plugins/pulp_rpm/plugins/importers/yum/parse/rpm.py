@@ -1,5 +1,7 @@
+from __future__ import absolute_import
 import logging
 import os
+import rpm as rpm_module
 
 from createrepo import yumbased
 from pulp.server import util
@@ -90,3 +92,45 @@ def string_to_unicode(data):
         except UnicodeError:
             # try others
             continue
+
+
+def package_headers(filename):
+    """
+    Return package header.
+
+    :param filename: full path to the package to analyze
+    :type  filename: str
+
+    :return: package header
+    :rtype: rpm.hdr
+    """
+
+    # Read the RPM header attributes for use later
+    ts = rpm_module.TransactionSet()
+    ts.setVSFlags(rpm_module._RPMVSF_NOSIGNATURES)
+    fd = os.open(filename, os.O_RDONLY)
+    try:
+        headers = ts.hdrFromFdno(fd)
+        os.close(fd)
+    except rpm_module.error:
+        # Raised if the headers cannot be read
+        os.close(fd)
+        raise
+
+    return headers
+
+
+def package_signature(headers):
+    """
+    Extract package signature.
+
+    :param headers: package header
+    :type  headers: rpm.hdr
+
+    :return: package signature
+    :rtype: str
+    """
+
+    signature = headers.sprintf("%|DSAHEADER?{%{DSAHEADER:pgpsig}}:{%|RSAHEADER?{%{RSAHEADER:pgpsig}}:{%|SIGGPG?{%{SIGGPG:pgpsig}}:{%|SIGPGP?{%{SIGPGP:pgpsig}}:{none}|}|}|}|")
+    # return first 8 digits from the signature
+    return signature.split()[-1][:8].lower()

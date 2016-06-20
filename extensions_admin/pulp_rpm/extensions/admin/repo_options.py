@@ -39,6 +39,13 @@ def parse_skip_types(t):
 
     return parsed
 
+def parse_string_set(input):
+
+    if input:
+        l = input.split(',')
+        return set(l)
+    return set()
+
 # group names
 NAME_PUBLISHING = _('Publishing')
 NAME_AUTH = _('Consumer Authentication')
@@ -50,6 +57,12 @@ d = _('comma-separated list of types to omit when synchronizing, if not '
       'specified all types will be synchronized; valid values are: %(t)s')
 d = d % {'t': ', '.join(VALID_SKIP_TYPES)}
 OPT_SKIP = PulpCliOption('--skip', d, required=False, parse_func=parse_skip_types)
+
+d = _('Allow unsigned packages. Defaults to True')
+OPT_ALLOW_UNSIGNED = PulpCliOption('--allow-unsigned', d, required=False, parse_func=parsers.parse_boolean)
+
+d = _('Allow signature keys. Comma separated keys.')
+OPT_ALLOW_KEYS = PulpCliOption('--allow-keys', d, required=False, allow_multiple=False, parse_func=parse_string_set)
 
 # publish options
 d = _('if "true", on each successful sync the repository will automatically be '

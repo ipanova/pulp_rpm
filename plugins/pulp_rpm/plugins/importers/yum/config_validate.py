@@ -2,6 +2,8 @@ from gettext import gettext as _
 
 from pulp.plugins.util import importer_config
 
+import logging
+_logger = logging.getLogger(__name__)
 
 def validate(config):
     """

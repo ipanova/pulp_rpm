@@ -199,6 +199,7 @@ def copy_rpms(units, source_repo, dest_repo, import_conduit, copy_deps, solver=N
     for unit in units:
         # we are passing in units that may have flattened "provides" metadata.
         # This flattened field is not used by associate_single_unit().
+        verify_signature(unit, config)
         repo_controller.associate_single_unit(dest_repo, unit)
         unit_set.add(unit)
 
@@ -338,6 +339,8 @@ def _associate_unit(dest_repo, unit):
     elif isinstance(unit, models.YumMetadataFile):
         return associate_copy_for_repo(unit, dest_repo, True)
     else:
+        if unit.type_id in (models.DRPM.TYPE, models.SRPM.TYPE):
+            verify_signature(unit, config)
         repo_controller.associate_single_unit(repository=dest_repo, unit=unit)
         return unit
 

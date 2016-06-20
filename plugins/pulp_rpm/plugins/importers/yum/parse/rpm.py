@@ -8,6 +8,9 @@ from pulp.server import util
 import rpmUtils
 
 
+class VerifySigException(Exception):pass
+
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -134,3 +137,20 @@ def package_signature(headers):
     signature = headers.sprintf("%|DSAHEADER?{%{DSAHEADER:pgpsig}}:{%|RSAHEADER?{%{RSAHEADER:pgpsig}}:{%|SIGGPG?{%{SIGGPG:pgpsig}}:{%|SIGPGP?{%{SIGPGP:pgpsig}}:{none}|}|}|}|")
     # return first 8 digits from the signature
     return signature.split()[-1][:8].lower()
+
+
+def verify_signature(unit, config):
+    signature = unit.signature
+    allow_unsigned = config.get("allow_unsigned", True)
+    allow_keys = config.get("allow_keys", [])
+    if not allow_unsigned and signature in ("none", None):
+        raise VerifySigException("Cannot import unsigned package %s", unit.filename)
+    if allow_keys:
+        verified = False
+        for key in allow_keys:
+            if key.lower() == signature.lower():
+                verified = True
+                break
+        if not verified:
+            raise VerifySigException("Invalid signature(%s) found for Package: %s. Allowed Signatures %s" % (signature,
+                                     unit.filename, allow_keys))

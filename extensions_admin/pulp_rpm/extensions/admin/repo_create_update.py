@@ -19,6 +19,8 @@ from pulp_rpm.common import constants, ids
 
 
 CONFIG_KEY_SKIP = 'type_skip_list'
+CONFIG_KEY_ALLOW_UNSSIGNED = 'allow_unsigned'
+CONFIG_KEY_ALLOW_KEYS = 'allow_keys'
 
 YUM_DISTRIBUTOR_CONFIG_KEYS = [
     ('relative_url', 'relative_url'),
@@ -84,15 +86,24 @@ class RpmRepoCreateCommand(CreateRepositoryCommand, ImporterConfigMixin):
         """
         super(RpmRepoCreateCommand, self).populate_sync_group()
         self.sync_group.add_option(repo_options.OPT_SKIP)
+        self.sync_group.add_option(repo_options.OPT_ALLOW_UNSIGNED)
+        self.sync_group.add_option(repo_options.OPT_ALLOW_KEYS)
 
     def parse_sync_group(self, user_input):
         config = ImporterConfigMixin.parse_sync_group(self, user_input)
         safe_parse(user_input, config, repo_options.OPT_SKIP.keyword, CONFIG_KEY_SKIP)
+        safe_parse(user_input, config, repo_options.OPT_ALLOW_UNSIGNED.keyword, CONFIG_KEY_ALLOW_UNSSIGNED)
+        safe_parse(user_input, config, repo_options.OPT_ALLOW_KEYS.keyword, CONFIG_KEY_ALLOW_KEYS)
         return config
 
     # -- create repository command overrides ----------------------------------
 
     def run(self, **kwargs):
+
+        if kwargs['download-policy'] in ('on_demand', 'background') and (kwargs['allow-unsigned'] is not None or kwargs['allow-keys']):
+            msg = _('Signature check is incompatible with deffered download')
+            self.prompt.render_failure_message(msg)
+            return
 
         # Remove any entries that weren't set by the user and translate those that are
         # explicitly empty to None
@@ -219,6 +230,7 @@ class RpmRepoUpdateCommand(UpdateRepositoryCommand, ImporterConfigMixin):
         """
         super(RpmRepoUpdateCommand, self).populate_sync_group()
         self.sync_group.add_option(repo_options.OPT_SKIP)
+        self.sync_group.add_option(repo_options.OPT_ALLOW_KEYS)
 
     def parse_sync_group(self, user_input):
         """
@@ -232,6 +244,7 @@ class RpmRepoUpdateCommand(UpdateRepositoryCommand, ImporterConfigMixin):
         """
         config = super(RpmRepoUpdateCommand, self).parse_sync_group(user_input)
         safe_parse(user_input, config, repo_options.OPT_SKIP.keyword, CONFIG_KEY_SKIP)
+        safe_parse(user_input, config, repo_options.OPT_ALLOW_KEYS.keyword, CONFIG_KEY_ALLOW_KEYS)
         return config
 
     def run(self, **kwargs):

@@ -125,6 +125,7 @@ def check_all_and_associate(wanted, conduit, download_deferred, catalog):
                 if unit._storage_path is None or not os.path.isfile(unit._storage_path):
                     continue
             catalog.add(unit)
+            verify_signature(unit, config)
             repo_controller.associate_single_unit(conduit.repo, unit)
             values.discard(unit.unit_key_as_named_tuple)
     still_wanted = set()

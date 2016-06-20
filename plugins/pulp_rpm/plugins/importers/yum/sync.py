@@ -615,6 +615,8 @@ class RepoSync(object):
             unit.save()
         except NotUniqueError:
             unit = unit.__class__.objects.filter(**unit.unit_key).first()
+        if not self.download_deffered:
+            verify_signature(unit, self.config)
         repo_controller.associate_single_unit(self.conduit.repo, unit)
         self.progress_report['content'].success(unit)
         self.conduit.set_progress(self.progress_report)

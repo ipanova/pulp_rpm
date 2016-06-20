@@ -418,6 +418,7 @@ def _handle_package(repo, type_id, unit_key, metadata, file_path, conduit, confi
     except NotUniqueError:
         unit = unit.__class__.objects.filter(**unit.unit_key).first()
 
+    rpm_parse.verify_signature(unit, config)
     repo_controller.associate_single_unit(repo, unit)
 
 
